@@ -1,0 +1,738 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Placement Report – SNIST 2024–25</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Source+Sans+3:ital,wght@0,300;0,400;0,600;0,700;1,400&display=swap');
+
+  :root {
+    --black:  #0a0a0a;
+    --ink:    #1a1a1a;
+    --body:   #3d3d3d;
+    --muted:  #888;
+    --rule:   #ddd;
+    --bg:     #f5f3f0;
+    --white:  #ffffff;
+    --blue:   #004f82;
+    --blue2:  #0070b8;
+    --red:    #c8102e;
+    --gold:   #e6960c;
+    --shadow: rgba(0,0,0,0.07);
+  }
+
+  * { margin:0; padding:0; box-sizing:border-box; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: 'Source Sans 3', sans-serif;
+    font-size: 14px;
+    line-height: 1.55;
+  }
+
+  /* ── TOPBAR ── */
+  .topbar {
+    background: var(--blue);
+    color: #fff;
+    padding: 0 3rem;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 2px 12px rgba(0,79,130,0.25);
+  }
+  .topbar .org {
+    font-size: 0.75rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    font-weight: 700;
+    opacity: 0.95;
+  }
+  .topbar .meta { font-size: 0.72rem; opacity: 0.6; letter-spacing: 0.04em; }
+
+  /* ── HERO ── */
+  .hero {
+    background: var(--white);
+    border-bottom: 4px solid var(--blue);
+    padding: 3rem 3rem 2.2rem;
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 2rem;
+    box-shadow: 0 2px 16px var(--shadow);
+  }
+  .hero-left .sub {
+    font-size: 0.72rem;
+    color: var(--muted);
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    margin-bottom: 0.6rem;
+  }
+  .hero-left h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(2rem, 4vw, 2.8rem);
+    color: var(--black);
+    line-height: 1.1;
+  }
+  .hero-left h1 span { color: var(--blue); }
+  .hero-right {
+    display: flex;
+    gap: 0;
+    flex-shrink: 0;
+    border: 1px solid var(--rule);
+  }
+  .hero-stat {
+    text-align: center;
+    padding: 1.2rem 2rem;
+    border-right: 1px solid var(--rule);
+    transition: background 0.25s ease;
+  }
+  .hero-stat:last-child { border-right: none; }
+  .hero-stat:hover { background: #f0f5fa; }
+  .hero-stat .num {
+    font-family: 'Playfair Display', serif;
+    font-size: 2rem;
+    color: var(--blue);
+    line-height: 1;
+    transition: color 0.2s;
+  }
+  .hero-stat:hover .num { color: var(--red); }
+  .hero-stat .lbl {
+    font-size: 0.68rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--muted);
+    margin-top: 4px;
+  }
+
+  /* ── PAGE ── */
+  .page { max-width: 1280px; margin: 0 auto; padding: 2.5rem 3rem; }
+
+  /* ── SECTION LABEL ── */
+  .section-label {
+    font-size: 0.66rem;
+    text-transform: uppercase;
+    letter-spacing: 0.22em;
+    color: var(--blue);
+    font-weight: 700;
+    margin-bottom: 0.25rem;
+  }
+  .section-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.35rem;
+    color: var(--black);
+    margin-bottom: 0.2rem;
+  }
+  .section-note { font-size: 0.78rem; color: var(--muted); margin-bottom: 1.6rem; }
+
+  hr { border: none; border-top: 1px solid var(--rule); margin: 2.8rem 0; }
+
+  /* ── KPI ROW ── */
+  .kpi-row {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 0;
+    background: var(--white);
+    border: 1px solid var(--rule);
+    margin-bottom: 1.8rem;
+    box-shadow: 0 1px 6px var(--shadow);
+  }
+  .kpi-cell {
+    padding: 1.6rem 1.5rem 1.4rem;
+    border-right: 1px solid var(--rule);
+    position: relative;
+    cursor: default;
+    transition: background 0.25s ease, transform 0.2s ease;
+  }
+  .kpi-cell:last-child { border-right: none; }
+  .kpi-cell:hover { background: #f0f5fa; transform: translateY(-2px); }
+  .kpi-cell::before {
+    content: '';
+    display: block;
+    height: 3px;
+    width: 0;
+    background: var(--blue);
+    margin-bottom: 0.9rem;
+    transition: width 0.4s ease;
+  }
+  .kpi-cell:hover::before { width: 36px; }
+  .kpi-cell.red::before { background: var(--red); }
+  .kpi-cell.gold::before { background: var(--gold); }
+  .kpi-cell.blue2::before { background: var(--blue2); }
+  .kpi-num {
+    font-family: 'Playfair Display', serif;
+    font-size: 2rem;
+    color: var(--black);
+    line-height: 1;
+    transition: color 0.2s;
+  }
+  .kpi-cell:hover .kpi-num { color: var(--blue); }
+  .kpi-lbl {
+    font-size: 0.68rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--muted);
+    margin-top: 0.35rem;
+  }
+
+  /* ── INSIGHT ── */
+  .insight-box {
+    background: #e8f2fb;
+    border-left: 4px solid var(--blue);
+    padding: 1rem 1.3rem;
+    margin-bottom: 2rem;
+    font-size: 0.85rem;
+    color: var(--ink);
+    display: flex;
+    gap: 0.8rem;
+    align-items: flex-start;
+    transition: border-color 0.25s ease, background 0.25s ease;
+  }
+  .insight-box:hover { border-color: var(--red); background: #fdf0f2; }
+  .insight-box .icon { font-size: 1rem; margin-top: 1px; flex-shrink: 0; }
+
+  /* ── GRID ── */
+  .two-col   { display: grid; grid-template-columns: 1fr 1fr; gap: 1.4rem; margin-bottom: 1.4rem; }
+  .three-col { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1.4rem; margin-bottom: 1.4rem; }
+
+  /* ── CARD ── */
+  .card {
+    background: var(--white);
+    border: 1px solid var(--rule);
+    padding: 1.5rem 1.6rem;
+    box-shadow: 0 1px 4px var(--shadow);
+    transition: box-shadow 0.3s ease, transform 0.25s ease, border-color 0.25s ease;
+    position: relative;
+    overflow: hidden;
+  }
+  .card::after {
+    content: '';
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 2px;
+    background: var(--blue);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.35s ease;
+  }
+  .card:hover {
+    box-shadow: 0 6px 24px rgba(0,79,130,0.12);
+    transform: translateY(-3px);
+    border-color: #b8d0e8;
+  }
+  .card:hover::after { transform: scaleX(1); }
+  .card.full { grid-column: 1/-1; }
+
+  .card-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 1.1rem;
+    padding-bottom: 0.8rem;
+    border-bottom: 1px solid var(--rule);
+  }
+  .card-title {
+    font-weight: 700;
+    font-size: 0.82rem;
+    color: var(--ink);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+  .card-note { font-size: 0.7rem; color: var(--muted); }
+
+  /* ── TABLE ── */
+  table { width: 100%; border-collapse: collapse; font-size: 0.82rem; }
+  thead th {
+    text-align: left;
+    font-size: 0.66rem;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--muted);
+    padding: 0 1rem 0.8rem;
+    border-bottom: 2px solid var(--black);
+  }
+  tbody td {
+    padding: 0.7rem 1rem;
+    border-bottom: 1px solid var(--rule);
+    color: var(--body);
+    transition: background 0.15s ease;
+  }
+  tbody tr:last-child td { border-bottom: none; }
+  tbody tr { transition: background 0.15s ease; }
+  tbody tr:hover td { background: #eef4fb; }
+  .dot {
+    display: inline-block;
+    width: 9px; height: 9px;
+    border-radius: 50%;
+    margin-right: 7px;
+    vertical-align: middle;
+    flex-shrink: 0;
+  }
+  .bar-mini {
+    background: #e4eaf0;
+    height: 6px;
+    overflow: hidden;
+    border-radius: 0;
+  }
+  .bar-mini-fill {
+    height: 6px;
+    border-radius: 0;
+    transition: width 1s ease;
+  }
+
+  /* ── FOOTER ── */
+  footer {
+    border-top: 2px solid var(--black);
+    padding: 1.2rem 3rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: var(--white);
+    font-size: 0.72rem;
+    color: var(--muted);
+  }
+  footer strong { color: var(--ink); }
+
+  @media(max-width:900px){
+    .two-col, .three-col { grid-template-columns:1fr; }
+    .kpi-row { grid-template-columns: repeat(2,1fr); }
+    .hero { flex-direction:column; }
+    .hero-right { width:100%; }
+    .page { padding: 2rem 1.5rem; }
+    .topbar { padding: 0 1.5rem; }
+    footer { flex-direction:column; gap:0.4rem; text-align:center; }
+  }
+</style>
+</head>
+<body>
+
+<!-- TOPBAR -->
+<div class="topbar">
+  <span class="org">Sreenidhi Institute of Science and Technology &nbsp;·&nbsp; Training &amp; Placement Cell</span>
+  <span class="meta">Academic Year 2024 – 25</span>
+</div>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-left">
+    <div class="sub">Annual Report &nbsp;/&nbsp; Placement Analytics</div>
+    <h1>Student Placement<br><span>Report 2024 – 25</span></h1>
+  </div>
+  <div class="hero-right">
+    <div class="hero-stat">
+      <div class="num">782</div>
+      <div class="lbl">Students Placed</div>
+    </div>
+    <div class="hero-stat">
+      <div class="num">9</div>
+      <div class="lbl">Departments</div>
+    </div>
+    <div class="hero-stat">
+      <div class="num">₹27L</div>
+      <div class="lbl">Highest CTC</div>
+    </div>
+    <div class="hero-stat">
+      <div class="num">60+</div>
+      <div class="lbl">Recruiters</div>
+    </div>
+  </div>
+</div>
+
+<div class="page">
+
+  <!-- KPI STRIP -->
+  <div class="kpi-row">
+    <div class="kpi-cell">
+      <div class="kpi-num">782</div>
+      <div class="kpi-lbl">Total Placed</div>
+    </div>
+    <div class="kpi-cell blue2">
+      <div class="kpi-num">₹5.87L</div>
+      <div class="kpi-lbl">Average CTC</div>
+    </div>
+    <div class="kpi-cell red">
+      <div class="kpi-num">₹27L</div>
+      <div class="kpi-lbl">Highest Package</div>
+    </div>
+    <div class="kpi-cell gold">
+      <div class="kpi-num">78</div>
+      <div class="kpi-lbl">Above 10 LPA</div>
+    </div>
+    <div class="kpi-cell">
+      <div class="kpi-num">60+</div>
+      <div class="kpi-lbl">Companies</div>
+    </div>
+  </div>
+
+  <!-- INSIGHT -->
+  <div class="insight-box">
+    <span class="icon">💡</span>
+    <span><strong>Key Finding:</strong> 45.3% of students were placed in the ₹3–5 LPA range, while 10% secured packages above ₹10 LPA. CSE leads with an average of ₹6.86L. AT&T India (₹16L), Zenoti (₹11.46L), and JUSPAY (₹27L) were the highest paying recruiters. Infosys was the single largest recruiter with <strong>102 students</strong>.</span>
+  </div>
+
+  <!-- SECTION 01 -->
+  <div class="section-label">Section 01</div>
+  <div class="section-title">Package Range Distribution</div>
+  <div class="section-note">Number of students placed across CTC salary brackets — all 9 departments combined</div>
+
+  <div class="two-col">
+    <div class="card">
+      <div class="card-head">
+        <span class="card-title">Students per Package Bracket</span>
+        <span class="card-note">All branches · n=782</span>
+      </div>
+      <canvas id="barChart" height="230"></canvas>
+    </div>
+    <div class="card">
+      <div class="card-head">
+        <span class="card-title">Proportional Breakdown</span>
+        <span class="card-note">Share per CTC slab</span>
+      </div>
+      <canvas id="donutChart" height="230"></canvas>
+    </div>
+  </div>
+
+  <hr>
+
+  <!-- SECTION 02 -->
+  <div class="section-label">Section 02</div>
+  <div class="section-title">Department-wise Analysis</div>
+  <div class="section-note">Placement volume and average compensation by branch</div>
+
+  <div class="two-col">
+    <div class="card">
+      <div class="card-head">
+        <span class="card-title">Students Placed by Department</span>
+        <span class="card-note">Absolute headcount</span>
+      </div>
+      <canvas id="deptChart" height="230"></canvas>
+    </div>
+    <div class="card">
+      <div class="card-head">
+        <span class="card-title">Average CTC by Department</span>
+        <span class="card-note">Mean offer in ₹ Lakhs (exact)</span>
+      </div>
+      <canvas id="avgChart" height="230"></canvas>
+    </div>
+  </div>
+
+  <hr>
+
+  <!-- SECTION 03 -->
+  <div class="section-label">Section 03</div>
+  <div class="section-title">Detailed Package Summary</div>
+  <div class="section-note">Breakdown of placements by CTC slab with percentage share and cumulative distribution</div>
+
+  <div class="card" style="margin-bottom:2rem">
+    <table>
+      <thead>
+        <tr>
+          <th>Package Range</th>
+          <th>Students</th>
+          <th>% Share</th>
+          <th style="width:240px">Distribution</th>
+          <th>Cumulative %</th>
+        </tr>
+      </thead>
+      <tbody id="summaryBody"></tbody>
+    </table>
+  </div>
+
+  <hr>
+
+  <!-- SECTION 04 -->
+  <div class="section-label">Section 04</div>
+  <div class="section-title">Top Recruiting Companies</div>
+  <div class="section-note">Companies with highest student intake across all departments (exact count)</div>
+
+  <div class="card" style="margin-bottom:1rem">
+    <canvas id="recruiterChart" height="200"></canvas>
+  </div>
+
+</div>
+
+<footer>
+  <span><strong>Training &amp; Placement Cell</strong> &nbsp;·&nbsp; Sreenidhi Institute of Science and Technology, Hyderabad</span>
+  <span>Data sourced from official placement records · 2024–25</span>
+</footer>
+
+<script>
+Chart.defaults.font.family = "'Source Sans 3', sans-serif";
+Chart.defaults.color = '#888';
+
+const PALETTE = ['#002f50','#004f82','#0070b8','#3a9ad9','#7cbdea','#aad4f0','#d0ebf9'];
+const TOTAL = 782;
+
+const BUCKETS = [
+  { label: '< 3 LPA',     count: 6   },
+  { label: '3 – 5 LPA',   count: 354 },
+  { label: '5 – 7 LPA',   count: 149 },
+  { label: '7 – 10 LPA',  count: 195 },
+  { label: '10 – 15 LPA', count: 69  },
+  { label: '15 – 20 LPA', count: 5   },
+  { label: '> 20 LPA',    count: 4   },
+];
+
+// Smooth hover plugin
+const hoverHighlight = {
+  id: 'hoverHighlight',
+  afterDatasetsDraw(chart) {}
+};
+
+const commonTooltip = {
+  backgroundColor: '#fff',
+  titleColor: '#1a1a1a',
+  bodyColor: '#555',
+  borderColor: '#ddd',
+  borderWidth: 1,
+  padding: 10,
+  cornerRadius: 0,
+  titleFont: { size: 12, weight: '700' },
+  bodyFont: { size: 12 },
+  boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
+};
+
+// BAR CHART
+new Chart(document.getElementById('barChart'), {
+  type: 'bar',
+  data: {
+    labels: BUCKETS.map(b => b.label),
+    datasets: [{
+      data: BUCKETS.map(b => b.count),
+      backgroundColor: PALETTE,
+      hoverBackgroundColor: PALETTE.map(c => c),
+      borderRadius: 0,
+      borderSkipped: false,
+    }]
+  },
+  options: {
+    responsive: true,
+    animation: { duration: 800, easing: 'easeOutQuart' },
+    plugins: {
+      legend: { display: false },
+      tooltip: {
+        ...commonTooltip,
+        callbacks: { label: c => ` ${c.parsed.y} students (${((c.parsed.y/TOTAL)*100).toFixed(1)}%)` }
+      }
+    },
+    scales: {
+      x: { ticks: { color: '#888', font: { size: 11 } }, grid: { display: false }, border: { color: '#ddd' } },
+      y: { ticks: { color: '#888' }, grid: { color: '#ebebeb' }, beginAtZero: true, border: { dash: [4,4], color: 'transparent' } }
+    },
+    onHover: (event, elements) => {
+      event.native.target.style.cursor = elements.length ? 'pointer' : 'default';
+    }
+  }
+});
+
+// DONUT
+new Chart(document.getElementById('donutChart'), {
+  type: 'doughnut',
+  data: {
+    labels: BUCKETS.map(b => b.label),
+    datasets: [{
+      data: BUCKETS.map(b => b.count),
+      backgroundColor: PALETTE,
+      borderWidth: 3,
+      borderColor: '#fff',
+      hoverOffset: 10,
+      hoverBorderColor: '#fff',
+    }]
+  },
+  options: {
+    cutout: '64%',
+    responsive: true,
+    animation: { duration: 900, easing: 'easeOutQuart' },
+    plugins: {
+      legend: {
+        position: 'right',
+        labels: { color: '#555', font: { size: 11 }, padding: 12, boxWidth: 11, usePointStyle: true, pointStyle: 'circle' }
+      },
+      tooltip: {
+        ...commonTooltip,
+        callbacks: { label: c => ` ${c.label}: ${c.parsed} students (${((c.parsed/TOTAL)*100).toFixed(1)}%)` }
+      }
+    }
+  }
+});
+
+// DEPT CHART
+const depts = [
+  { b: 'ECE', n: 192 }, { b: 'CSE', n: 153 }, { b: 'IT', n: 134 },
+  { b: 'EEE', n: 67 },  { b: 'ECM', n: 57 },  { b: 'MECH', n: 53 },
+  { b: 'CSE-CS', n: 39 }, { b: 'CSE-IOT', n: 39 }, { b: 'Civil', n: 31 }
+].sort((a, b) => b.n - a.n);
+
+new Chart(document.getElementById('deptChart'), {
+  type: 'bar',
+  data: {
+    labels: depts.map(d => d.b),
+    datasets: [{
+      data: depts.map(d => d.n),
+      backgroundColor: '#004f82',
+      hoverBackgroundColor: '#c8102e',
+      borderRadius: 0,
+    }]
+  },
+  options: {
+    responsive: true,
+    animation: { duration: 800, easing: 'easeOutQuart' },
+    plugins: {
+      legend: { display: false },
+      tooltip: {
+        ...commonTooltip,
+        callbacks: { label: c => ` ${c.parsed.y} students placed` }
+      }
+    },
+    scales: {
+      x: { ticks: { color: '#888', font: { size: 11 } }, grid: { display: false }, border: { color: '#ddd' } },
+      y: { ticks: { color: '#888' }, grid: { color: '#ebebeb' }, beginAtZero: true, border: { dash: [4,4], color: 'transparent' } }
+    },
+    onHover: (e, el) => { e.native.target.style.cursor = el.length ? 'pointer' : 'default'; }
+  }
+});
+
+// AVG CTC
+const avgData = [
+  { b: 'CSE',     avg: 6.86 },
+  { b: 'IT',      avg: 6.76 },
+  { b: 'CSE-IOT', avg: 6.17 },
+  { b: 'CSE-CS',  avg: 6.02 },
+  { b: 'ECM',     avg: 5.57 },
+  { b: 'ECE',     avg: 5.42 },
+  { b: 'EEE',     avg: 4.63 },
+  { b: 'MECH',    avg: 4.46 },
+  { b: 'Civil',   avg: 3.85 },
+].sort((a, b) => b.avg - a.avg);
+
+new Chart(document.getElementById('avgChart'), {
+  type: 'bar',
+  data: {
+    labels: avgData.map(d => d.b),
+    datasets: [{
+      data: avgData.map(d => d.avg),
+      backgroundColor: '#0070b8',
+      hoverBackgroundColor: '#e6960c',
+      borderRadius: 0,
+    }]
+  },
+  options: {
+    indexAxis: 'y',
+    responsive: true,
+    animation: { duration: 900, easing: 'easeOutQuart' },
+    plugins: {
+      legend: { display: false },
+      tooltip: {
+        ...commonTooltip,
+        callbacks: { label: c => ` ₹${c.parsed.x.toFixed(2)}L average` }
+      }
+    },
+    scales: {
+      x: {
+        ticks: { color: '#888', callback: v => '₹' + v + 'L' },
+        grid: { color: '#ebebeb' }, beginAtZero: true,
+        border: { dash: [4,4], color: 'transparent' }
+      },
+      y: { ticks: { color: '#555', font: { size: 11 } }, grid: { display: false }, border: { color: '#ddd' } }
+    },
+    onHover: (e, el) => { e.native.target.style.cursor = el.length ? 'pointer' : 'default'; }
+  }
+});
+
+// RECRUITER CHART — exact counts
+const recruiters = [
+  ['Infosys', 102],
+  ['Launched', 43],
+  ['RINEX Technologies', 41],
+  ['CAMPALIN', 41],
+  ['LTIMindtree', 34],
+  ['Drafttech International', 33],
+  ['Cognizant', 31],
+  ['SkillHigh', 30],
+  ['Vishwa Samudra', 28],
+  ['Lakshmi Hyundai', 21],
+  ['Megha Engineering', 19],
+  ['Planon', 17],
+  ['RealPage India', 13],
+  ['Glowlogics', 13],
+  ['Foxconn Pluginlive', 11],
+];
+
+new Chart(document.getElementById('recruiterChart'), {
+  type: 'bar',
+  data: {
+    labels: recruiters.map(r => r[0]),
+    datasets: [{
+      data: recruiters.map(r => r[1]),
+      backgroundColor: '#002f50',
+      hoverBackgroundColor: '#004f82',
+      borderRadius: 0,
+    }]
+  },
+  options: {
+    indexAxis: 'y',
+    responsive: true,
+    animation: { duration: 1000, easing: 'easeOutQuart' },
+    plugins: {
+      legend: { display: false },
+      tooltip: {
+        ...commonTooltip,
+        callbacks: { label: c => ` ${c.parsed.x} students hired` }
+      }
+    },
+    scales: {
+      x: { ticks: { color: '#888' }, grid: { color: '#ebebeb' }, beginAtZero: true, border: { dash: [4,4], color: 'transparent' } },
+      y: { ticks: { color: '#555', font: { size: 11 } }, grid: { display: false }, border: { color: '#ddd' } }
+    },
+    onHover: (e, el) => { e.native.target.style.cursor = el.length ? 'pointer' : 'default'; }
+  }
+});
+
+// TABLE — animate bars on load
+let cum = 0;
+const tbody = document.getElementById('summaryBody');
+BUCKETS.forEach((b, i) => {
+  cum += b.count;
+  const pct = ((b.count / TOTAL) * 100).toFixed(1);
+  const cumPct = ((cum / TOTAL) * 100).toFixed(1);
+  const row = document.createElement('tr');
+  row.innerHTML = `
+    <td><span class="dot" style="background:${PALETTE[i]}"></span>${b.label}</td>
+    <td><strong>${b.count}</strong></td>
+    <td>${pct}%</td>
+    <td>
+      <div class="bar-mini">
+        <div class="bar-mini-fill" id="bar-${i}" style="width:0%;background:${PALETTE[i]}"></div>
+      </div>
+    </td>
+    <td style="color:#999">${cumPct}%</td>
+  `;
+  tbody.appendChild(row);
+});
+
+// Animate table bars on scroll
+const observer = new IntersectionObserver(entries => {
+  if (entries[0].isIntersecting) {
+    BUCKETS.forEach((b, i) => {
+      const pct = ((b.count / TOTAL) * 100).toFixed(1);
+      setTimeout(() => {
+        const el = document.getElementById('bar-' + i);
+        if (el) el.style.width = pct + '%';
+      }, i * 80);
+    });
+    observer.disconnect();
+  }
+}, { threshold: 0.3 });
+
+observer.observe(document.getElementById('summaryBody'));
+</script>
+</body>
+</html>
