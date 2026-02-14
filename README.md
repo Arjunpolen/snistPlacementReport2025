@@ -5,6 +5,9 @@ This repository contains an interactive placement report for Sreenidhi Institute
 
 ## Repository Contents
 - `SNIST_Placement_Report_2024_25.html`: Main report file with layout, styling, analytics logic, and charts.
+- `index.html`: Default entry page used by static hosts such as Netlify.
+- `netlify.toml`: Netlify build configuration (publish from repository root).
+- `_redirects`: Netlify redirect rules.
 - `README.md`: Project documentation.
 
 ## Key Metrics Included in the Report
@@ -32,6 +35,15 @@ Example on macOS:
 ```bash
 open SNIST_Placement_Report_2024_25.html
 ```
+
+## Deploy on Netlify
+Use these settings when creating the Netlify site:
+
+- Base directory: *(leave empty)*
+- Build command: *(leave empty)*
+- Publish directory: `.`
+
+This repository already includes `index.html`, `netlify.toml`, and `_redirects`, so no build step is required.
 
 ## Data and Annual Update Guide
 The report data is currently embedded in the HTML file. For future academic years, update the following sections in `SNIST_Placement_Report_2024_25.html`:
